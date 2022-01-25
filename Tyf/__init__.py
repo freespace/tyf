@@ -432,6 +432,11 @@ class JpegFile(list):
         if marker != 0xffd8:
             raise InvalidFileError("not a valid jpeg file")
 
+        # malformed JPEG files may contain 2 APP1 segments, one of which will be properly filled
+        # out and the other is empty. We use this to track the size of the last app1 segment
+        # and only update self.ifd if it is a larger segment than previously encountered
+        largest_app1_segment_size = -1
+
         while marker != 0xffd9:  # EOI (End Of Image) Marker
             marker, count = unpack(">HH", fileobj)
             # if JPEG raw data
@@ -442,10 +447,13 @@ class JpegFile(list):
             elif marker == 0xffe1:
                 data = fileobj.read(count-2)
                 if data[:6] == b"Exif\x00\x00":
-                    string = StringIO(data[6:])
-                    self.ifd = TiffFile(string)
-                    string.close()
-                    sgmt.append((0xffe1, self.ifd))
+                    # only update self.ifd if this segment is largest seen so far
+                    if count > largest_app1_segment_size:
+                      largest_app1_segment_size = count
+                      string = StringIO(data[6:])
+                      self.ifd = TiffFile(string)
+                      string.close()
+                      sgmt.append((0xffe1, self.ifd))
                 elif b"ns.adobe.com" in data[:30]:
                     self.xmp = xmp.fromstring(data[data.find(b"\x00")+1:])
                     sgmt.append((0xffe1, self.xmp))
