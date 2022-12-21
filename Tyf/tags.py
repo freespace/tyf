@@ -4,6 +4,20 @@
 
 from Tyf import reduce
 
+"""
+Tags are defined as:
+
+  <tag number>: ("tag name", [<tag type>], "tag description")
+
+For tag number/name/description see for example:
+
+  https://exiv2.org/tags.html
+
+Note that <tag type> is _NOT_ exif-type, but the mapping defined in
+__init__.py.TYPES. e.g. a byte or unsigned short is 1 even though
+exif defines BYTE as 1 and SHORT as 3
+"""
+
 # Baseline TIFF tags
 bTT = {
     254:   ("NewSubfileType", [1], (0,), "A general indication of the kind of data contained in this subfile"),
@@ -201,6 +215,7 @@ exfT = {
     34852: ("SpectralSensitivity", [2], None, "Indicates the spectral sensitivity of each channel of the camera used"),
     34855: ("ISOSpeedRatings", [1], None, "Indicates the ISO Speed and ISO Latitude of the camera or input device as specified in ISO 12232"),
     34856: ("OECF", [7], None, "Indicates the Opto-Electric Conversion Function (OECF) specified in ISO 14524"),
+    34867: ("ISOSpeed", [4], None, "This tag indicates the ISO speed value of a camera or input device that is defined in ISO 12232."),
     36864: ("ExifVersion", [7], b"0220", "The version of the supported Exif standard"),
     36867: ("DateTimeOriginal", [2], None, "The date and time when the original image data was generated"),
     36868: ("DateTimeDigitized", [2], None, "The date and time when the image was stored as digital data"),
